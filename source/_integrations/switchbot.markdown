@@ -106,6 +106,47 @@ Encryption key:
 
 For instructions on how to obtain the locks encryption key, see README in [PySwitchbot](https://github.com/Danielhiversen/pySwitchbot#obtaining-locks-encryption-key) project.
 
+## SwitchBot Blind Tilt
+
+The integration expresses the SwitchBot Blind Tilt position unlike most other covers:
+| Tilt Position | Blind State |
+| ------------- | ----------- |
+| 100           | Closed Up   |
+| 50            | Fully Open  |
+| 0             | Closed Down |
+
+This allows for fully controlling position of the blinds. The 'Close' service call will close the blinds to the closest closed position (either 0 or 100) and defaults to closing down if the blinds are fully open.
+
+### Simple Cover Template Entity
+
+It is possible to use a [Cover Template](/integrations/cover.template) to make a cover entity that will be open at 100 and closed at 0. This template entity only closes in one direction, but is useful when exposing the Blind Tilt to other services which expect that `100->Open` and `0->Closed`.
+
+```
+example_blinds:
+  device_class: blind
+  friendly_name: Example Blinds (Simple Down)
+  open_cover:
+    service: cover.set_cover_tilt_position
+    data:
+      tilt_position: 50
+    target:
+      entity_id: cover.example_blinds
+  close_cover:
+    service: cover.set_cover_tilt_position
+    data:
+      tilt_position: 0
+    target:
+      entity_id: cover.example_blinds
+  position_template: >
+    {{ int(states.cover.example_blinds.attributes.current_tilt_position)*2 }}
+  set_cover_position:
+    service: cover.set_cover_tilt_position
+    data:
+      tilt_position: "{{position/2}}"
+    target:
+      entity_id: cover.example_blinds
+```
+ 
 ## Error codes and troubleshooting
 
 The SwitchBot integration will automatically discover devices once the [Bluetooth](/integrations/bluetooth) integration is enabled and functional.
